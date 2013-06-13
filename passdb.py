@@ -11,7 +11,7 @@ class PassDB(object):
       c = self.conn.execute("CREATE TABLE passwords(service varchar(30), login varchar(30), password varchar(70), comment text)")
   
   def list(self):
-    c = self.conn.execute("SELECT service FROM passwords")
+    c = self.conn.execute("SELECT service FROM passwords ORDER BY service")
     services = []
     for i in c.fetchall():
       services.append(i[0])
