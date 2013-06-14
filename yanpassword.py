@@ -58,23 +58,33 @@ while True:
       exit(0)
   else:
     args = comm.strip().split()
-    cmd = args[0]
-    if cmd == 'list':
+    cmd = args[0].lower()
+    if cmd == 'list' or cmd == 'ls':
       services = db.list()
       for service in services:
         print service
-    elif cmd == 'get':
+    elif cmd == 'get' or cmd == 'cat':
       if len(args) != 2:
-        print "Usage: get <servicename>"
+        print "Usage: get|cat <servicename>"
         continue
       service = db.get(args[1])
+      print
       print "Service: " + service["service"]
       print "Login: " + service["login"]
       print "Password: " + service["password"]
       print "Comment: " + service["comment"]
-    elif cmd == 'set':
+    elif cmd == '?' or cmd == 'help':
+      print """
+Usage:
+
+      list                  lists all services stored in db
+      get <servicename>     shows service data
+      set <servicename>     creates new or modifies existing service
+      delete <servicename>  deletes service from db
+      help                  shows this message"""
+    elif cmd == 'set' or cmd == 'edit':
       if len(args) != 2:
-        print "Usage: set <servicename>"
+        print "Usage: set|edit <servicename>"
         continue
       print
       sys.stdout.write("Login: ")
@@ -84,9 +94,9 @@ while True:
       sys.stdout.write("Comment: ")
       comment = sys.stdin.readline().strip()
       db.set(args[1], login, password, comment)
-    elif cmd == 'delete':
+    elif cmd == 'delete' or cmd == 'rm':
       if len(args) != 2:
-        print "Usage: delete <servicename>"
+        print "Usage: delete|rm <servicename>"
         continue
       service = db.delete(args[1])
     elif cmd == 'exit':
@@ -100,4 +110,5 @@ while True:
       key = hashlib.sha256(cdbpass).digest()
       crypter.encrypt_file(key, dbfile.name, store.tmpfile.name)
       store.save()
-      
+    else:
+      print "Syntax error. Use help command to list available commands"
