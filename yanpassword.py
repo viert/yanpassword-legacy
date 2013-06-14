@@ -96,6 +96,8 @@ Usage:
       sys.stdout.write("Comment: ")
       comment = sys.stdin.readline().strip()
       db.set(args[1], login, password, comment)
+      print "DON'T FORGET TO *save*, otherwise data will be lost"
+
     elif cmd == 'delete' or cmd == 'rm':
       if len(args) != 2:
         print "Usage: delete|rm <servicename>"
