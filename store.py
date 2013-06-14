@@ -46,7 +46,7 @@ class Store(object):
     f = file(self.tmpfile.name)
     data = f.read()
     f.close()
-    resp = self.http.request(self.REMOTEURL + self.REMOTEPATH + self.REMOTEFILE, method="PROPFIND", headers={"Authorization" : self.token})
+    resp = self.http.request(self.REMOTEURL + self.REMOTEPATH + self.REMOTEFILE, method="PROPFIND", headers={"Authorization" : self.token, "Depth" : "1"})
     if resp[0]["status"] != "404":
       print "Creating backup"
       resp = self.http.request(self.REMOTEURL + self.REMOTEPATH + self.REMOTEFILE, method="MOVE", headers={"Authorization" : self.token, "Destination" : self.REMOTEPATH + self.REMOTEFILE + ".backup"})
