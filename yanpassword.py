@@ -81,7 +81,9 @@ Usage:
       get <servicename>     shows service data
       set <servicename>     creates new or modifies existing service
       delete <servicename>  deletes service from db
-      help                  shows this message"""
+      help                  shows this message
+      save                  encrypts and saves db to yandex.disk
+      exit                  exits yanpassword"""
     elif cmd == 'set' or cmd == 'edit':
       if len(args) != 2:
         print "Usage: set|edit <servicename>"
@@ -99,7 +101,7 @@ Usage:
         print "Usage: delete|rm <servicename>"
         continue
       service = db.delete(args[1])
-    elif cmd == 'exit':
+    elif cmd == 'exit' or cmd == 'quit':
       exit(0)
     elif cmd == 'save':
       cdbpass = getpass.getpass(prompt='Enter password to encrypt file: ')
