@@ -40,6 +40,9 @@ if r["status"] == "200":
 elif r["status"] == "404":
   print "Remote CryptDB file not found, creating"
   db = PassDB(dbfile.name)
+elif r["status"] == "403":
+  print "Error loading CryptDB file, probably Yandex.Disk is not activated for your account. Visit disk.yandex.com to activate"
+  exit(2)
 else:
   print "Error loading CryptDB file"
   print r
