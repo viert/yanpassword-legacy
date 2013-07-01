@@ -15,7 +15,13 @@ db = None
 class CmdLine(cmd.Cmd):
 
   prompt = "YanPwd> "
-  
+
+  def cmdloop(self):
+    try: cmd.Cmd.cmdloop(self)
+    except KeyboardInterrupt:
+      print
+      self.cmdloop()
+
   def do_list(self, arg):
     services = db.list()
     for service in services:
