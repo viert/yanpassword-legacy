@@ -23,14 +23,21 @@ class CmdLine(cmd.Cmd):
       self.cmdloop()
 
   def do_list(self, arg):
+    """list:
+  lists all services stored in db"""
     services = db.list()
     for service in services:
       print service
 
   def do_ls(self, arg):
+    """list:
+  lists all services stored in db"""
     self.do_list(arg)
 
   def do_get(self, arg):
+    """get:
+  shows service data
+  Usage: get|cat <servicename>"""
     if arg.strip() == "":
       print "Usage: get|cat <servicename>"
       return
@@ -46,10 +53,19 @@ class CmdLine(cmd.Cmd):
     print
 
   def do_delete(self, arg):
+    """delete:
+  remove service's data from database
+  Usage: delete|rm <servicename>"""
     if arg.strip() == "":
       print "Usage: delete|rm <servicename>"
       return
     service = db.delete(arg)
+  
+  def do_rm(self, arg):
+    """delete:
+  remove service's data from database
+  Usage: delete|rm <servicename>"""
+    self.do_delete(arg)
 
   def complete_get(self, text, line, begidx, endidx):
     vocab = db.list()
@@ -66,17 +82,33 @@ class CmdLine(cmd.Cmd):
     return self.complete_get(text, line, begidx, endidx)
 
   def do_cat(self, arg):
-    self.get(arg)
+    """get:
+  shows service data
+  Usage: get|cat <servicename>"""
+    self.do_get(arg)
 
   def do_EOF(self, arg):
+    """exit:
+  exits program"""
     sys.stdout.write("\nReally exit (y/n)? ")
     if sys.stdin.readline().strip().lower() == "y":
       sys.exit()
 
   def do_exit(self, arg):
+    """exit:
+  exits program"""
     self.do_EOF(arg)
 
+  def do_edit(self, arg):
+    """set:
+  set service's data
+  Usage: set|edit <servicename>"""
+    self.do_set(arg)
+
   def do_set(self, arg):
+    """set:
+  set service's data
+  Usage: set|edit <servicename>"""
     if arg.strip() == "":
       print "Usage: set|edit <servicename>"
       return
@@ -92,6 +124,8 @@ class CmdLine(cmd.Cmd):
     print
 
   def do_save(self, arg):
+    """save:
+  encrypts and saves db to yandex.disk"""
     cdbpass = getpass.getpass(prompt='Enter password to encrypt file: ')
     cdbpasschk = getpass.getpass(prompt='And one more time the same please: ')
     if cdbpass != cdbpasschk:
@@ -100,6 +134,7 @@ class CmdLine(cmd.Cmd):
     key = hashlib.sha256(cdbpass).digest()
     crypter.encrypt_file(key, dbfile.name, store.tmpfile.name)
     store.save()
+
 
 
 while True:
@@ -140,73 +175,3 @@ else:
 
 cli = CmdLine()
 cli.cmdloop()
-exit(0)
-
-# Command-Line Loop
-while True:
-  sys.stdout.write(PROMPT)
-  comm = sys.stdin.readline()
-  if len(comm) == 0:
-    sys.stdout.write("\nReally exit? ")
-    if sys.stdin.readline().strip().lower() == "y":
-      exit(0)
-  else:
-    args = comm.strip().split()
-    cmd = args[0].lower()
-    if cmd == 'list' or cmd == 'ls':
-      services = db.list()
-      for service in services:
-        print service
-    elif cmd == 'get' or cmd == 'cat':
-      if len(args) != 2:
-        print "Usage: get|cat <servicename>"
-        continue
-      service = db.get(args[1])
-      print
-      print "Service: " + service["service"]
-      print "Login: " + service["login"]
-      print "Password: " + service["password"]
-      print "Comment: " + service["comment"]
-    elif cmd == '?' or cmd == 'help':
-      print """
-Usage:
-
-      list                  lists all services stored in db
-      get <servicename>     shows service data
-      set <servicename>     creates new or modifies existing service
-      delete <servicename>  deletes service from db
-      help                  shows this message
-      save                  encrypts and saves db to yandex.disk
-      exit                  exits yanpassword"""
-    elif cmd == 'set' or cmd == 'edit':
-      if len(args) != 2:
-        print "Usage: set|edit <servicename>"
-        continue
-      print
-      sys.stdout.write("Login: ")
-      login = sys.stdin.readline().strip()
-      sys.stdout.write("Password: ")
-      password = sys.stdin.readline().strip()
-      sys.stdout.write("Comment: ")
-      comment = sys.stdin.readline().strip()
-      db.set(args[1], login, password, comment)
-      print "DON'T FORGET TO *save*, otherwise data will be lost"
-
-    elif cmd == 'delete' or cmd == 'rm':
-      if len(args) != 2:
-        print "Usage: delete|rm <servicename>"
-        continue
-      service = db.delete(args[1])
-    elif cmd == 'exit' or cmd == 'quit':
-      exit(0)
-    elif cmd == 'save':
-      cdbpass = getpass.getpass(prompt='Enter password to encrypt file: ')
-      cdbpasschk = getpass.getpass(prompt='And one more time the same please: ')
-      if cdbpass != cdbpasschk:
-        print "Passwords do not match, file saving aborted"
-        continue
-      key = hashlib.sha256(cdbpass).digest()
-      crypter.encrypt_file(key, dbfile.name, store.tmpfile.name)
-      store.save()
-    else:
-      print "Syntax error. Use help command to list available commands"
