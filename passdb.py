@@ -20,6 +20,7 @@ class PassDB(object):
   def get(self, service):
     c = self.conn.execute("SELECT service, login, password, comment FROM passwords WHERE service = '" + service + "'")
     r = c.fetchone()
+    if r is None: return None
     service = {}
     service["service"] = r[0]
     service["login"] = r[1]
