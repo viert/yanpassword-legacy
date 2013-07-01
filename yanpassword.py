@@ -7,10 +7,94 @@ import getpass
 import sys
 import tempfile
 import hashlib
+import cmd
 
-PROMPT = "\nYanPwd> "
 store = None
 db = None
+
+class CmdLine(cmd.Cmd):
+
+  prompt = "YanPwd> "
+  
+  def do_list(self, arg):
+    services = db.list()
+    for service in services:
+      print service
+
+  def do_ls(self, arg):
+    self.do_list(arg)
+
+  def do_get(self, arg):
+    if arg.strip() == "":
+      print "Usage: get|cat <servicename>"
+      return
+    service = db.get(arg)
+    if service is None:
+      print "Service '" + arg + "' not found"
+      return
+    print
+    print "Service:  " + service["service"]
+    print "Login:    " + service["login"]
+    print "Password: " + service["password"]
+    print "Comment:  " + service["comment"]
+    print
+
+  def do_delete(self, arg):
+    if arg.strip() == "":
+      print "Usage: delete|rm <servicename>"
+      return
+    service = db.delete(arg)
+
+  def complete_get(self, text, line, begidx, endidx):
+    vocab = db.list()
+    opts = [x for x in vocab if x.startswith(text)]
+    return opts
+
+  def complete_cat(self, text, line, begidx, endidx):
+    return self.complete_get(text, line, begidx, endidx)
+  
+  def complete_rm(self, text, line, begidx, endidx):
+    return self.complete_get(text, line, begidx, endidx)
+  
+  def complete_delete(self, text, line, begidx, endidx):
+    return self.complete_get(text, line, begidx, endidx)
+
+  def do_cat(self, arg):
+    self.get(arg)
+
+  def do_EOF(self, arg):
+    sys.stdout.write("\nReally exit (y/n)? ")
+    if sys.stdin.readline().strip().lower() == "y":
+      sys.exit()
+
+  def do_exit(self, arg):
+    self.do_EOF(arg)
+
+  def do_set(self, arg):
+    if arg.strip() == "":
+      print "Usage: set|edit <servicename>"
+      return
+    print
+    sys.stdout.write("Login: ")
+    login = sys.stdin.readline().strip()
+    sys.stdout.write("Password: ")
+    password = sys.stdin.readline().strip()
+    sys.stdout.write("Comment: ")
+    comment = sys.stdin.readline().strip()
+    db.set(arg, login, password, comment)
+    print "DON'T FORGET TO *save*, otherwise data will be lost"
+    print
+
+  def do_save(self, arg):
+    cdbpass = getpass.getpass(prompt='Enter password to encrypt file: ')
+    cdbpasschk = getpass.getpass(prompt='And one more time the same please: ')
+    if cdbpass != cdbpasschk:
+      print "Passwords do not match, file saving aborted"
+      return
+    key = hashlib.sha256(cdbpass).digest()
+    crypter.encrypt_file(key, dbfile.name, store.tmpfile.name)
+    store.save()
+
 
 while True:
   sys.stdout.write("\nYandex login: ")
@@ -47,6 +131,10 @@ else:
   print "Error loading CryptDB file"
   print r
   exit(255)
+
+cli = CmdLine()
+cli.cmdloop()
+exit(0)
 
 # Command-Line Loop
 while True:
