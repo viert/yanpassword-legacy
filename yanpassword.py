@@ -131,8 +131,7 @@ class CmdLine(cmd.Cmd):
     if cdbpass != cdbpasschk:
       print "Passwords do not match, file saving aborted"
       return
-    key = hashlib.sha256(cdbpass).digest()
-    crypter.encrypt_file(key, dbfile.name, store.tmpfile.name)
+    crypter.encrypt_file(cdbpass, dbfile.name, store.tmpfile.name)
     store.save()
 
 
@@ -155,8 +154,7 @@ r = store.load()
 if r["status"] == "200":
   while True:
     cdbpass = getpass.getpass("Enter CryptDB password: ")
-    key = hashlib.sha256(cdbpass).digest()
-    crypter.decrypt_file(key, store.tmpfile.name, dbfile.name)
+    crypter.decrypt_file(cdbpass, store.tmpfile.name, dbfile.name)
     try:
       db = PassDB(dbfile.name)
       break
