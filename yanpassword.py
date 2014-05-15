@@ -6,9 +6,11 @@ from passdb import crypter
 import getpass
 import sys
 import tempfile
-import hashlib
 import cmd
+import os
+import re
 
+CONFIG = os.path.join(os.getenv('HOME'), '.yanpassword.conf')
 store = None
 db = None
 
@@ -136,41 +138,67 @@ class CmdLine(cmd.Cmd):
     store.save()
 
 
+if __name__ == "__main__":
 
-while True:
-  sys.stdout.write("\nYandex login: ")
-  ylogin = sys.stdin.readline().strip()
-  ypass = getpass.getpass(prompt="Password: ")
-  
-  try:
-    store = Store(ylogin, ypass)
-    break
-  except:
-    print "Authorization error, wrong login or password?"
+  ylogin, ypass = None, None
 
-print "Loading CryptDB file"
-dbfile = tempfile.NamedTemporaryFile()
+  if os.path.exists(CONFIG) and os.path.isfile(CONFIG):
+    pattern = re.compile("(user|password)\s*=\s*(.+)")
+    with open(CONFIG) as cfg:
+      for line in cfg:
+        line = line.strip()
+        line = re.sub(r'\s*#.*$', '', line)
+        match = pattern.match(line)
+        if match is None: continue
+        if match.groups()[0] == "user":
+          ylogin = match.groups()[1]
+        elif match.groups()[0] == "password":
+          ypass = match.groups()[1]
+      if not ypass is None:
+        mode = os.stat(CONFIG).st_mode
+        if mode & 63 != 0:
+          print "Storing password in config file is insecure. At least change your config file permissions to 0600"
+          sys.exit(255)
 
-r = store.load()
-if r["status"] == "200":
   while True:
-    cdbpass = getpass.getpass("Enter CryptDB password: ")
-    crypter.decrypt_file(cdbpass, store.tmpfile.name, dbfile.name)
+    if ylogin is None:
+      sys.stdout.write("\nYandex login: ")
+      ylogin = sys.stdin.readline().strip()
+    else:
+      print "Using yandex login '%s'" % ylogin
+    if ypass is None:
+      ypass = getpass.getpass(prompt="Password: ")
+
     try:
-      db = PassDB(dbfile.name)
+      store = Store(ylogin, ypass)
       break
     except:
-      print "CryptDB file is invalid, wrong password?"
-elif r["status"] == "404":
-  print "Remote CryptDB file not found, creating"
-  db = PassDB(dbfile.name)
-elif r["status"] == "403":
-  print "Error loading CryptDB file, probably Yandex.Disk is not activated for your account. Visit disk.yandex.com to activate"
-  exit(2)
-else:
-  print "Error loading CryptDB file"
-  print r
-  exit(255)
+      print "Authorization error, wrong login or password?"
+      ylogin, ypass = None, None
 
-cli = CmdLine()
-cli.cmdloop()
+  print "Loading CryptDB file"
+  dbfile = tempfile.NamedTemporaryFile()
+
+  r = store.load()
+  if r["status"] == "200":
+    while True:
+      cdbpass = getpass.getpass("Enter CryptDB password: ")
+      crypter.decrypt_file(cdbpass, store.tmpfile.name, dbfile.name)
+      try:
+        db = PassDB(dbfile.name)
+        break
+      except:
+        print "CryptDB file is invalid, wrong password?"
+  elif r["status"] == "404":
+    print "Remote CryptDB file not found, creating"
+    db = PassDB(dbfile.name)
+  elif r["status"] == "403":
+    print "Error loading CryptDB file, probably Yandex.Disk is not activated for your account. Visit disk.yandex.com to activate"
+    exit(2)
+  else:
+    print "Error loading CryptDB file"
+    print r
+    exit(255)
+
+  cli = CmdLine()
+  cli.cmdloop()
