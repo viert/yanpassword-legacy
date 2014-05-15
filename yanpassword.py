@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from store import Store
-from passdb import PassDB
-import crypter
+from yadisk.store import Store
+from passdb.passdb import PassDB
+from passdb import crypter
 import getpass
 import sys
 import tempfile
@@ -90,8 +90,9 @@ class CmdLine(cmd.Cmd):
   def do_EOF(self, arg):
     """exit:
   exits program"""
-    sys.stdout.write("\nReally exit (y/n)? ")
-    if sys.stdin.readline().strip().lower() == "y":
+    sys.stdout.write("\nReally exit (Y/n)? ")
+    answer = sys.stdin.readline().strip().lower()
+    if answer in [ "y", "" ]:
       sys.exit()
 
   def do_exit(self, arg):
