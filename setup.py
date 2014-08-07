@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "YanPassword",
-    version = "0.9-rc1",
+    version = "0.9-rc2",
     packages = find_packages(),
 
     scripts = [ 'yanpassword.py' ],
