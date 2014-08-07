@@ -6,7 +6,7 @@ setup(
     packages = find_packages(),
 
     scripts = [ 'yanpassword.py' ],
-    install_requires = [ 'pycrypto' ],
+    install_requires = [ 'pycrypto', 'httplib2' ],
 
     author = "Pavel Vorobyov",
     author_email = "aquavitale@yandex.ru",
