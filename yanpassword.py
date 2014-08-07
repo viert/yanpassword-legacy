@@ -3,12 +3,18 @@
 from yadisk.store import Store
 from passdb.passdb import PassDB
 from passdb import crypter
+import readline
 import getpass
 import sys
 import tempfile
 import cmd
 import os
 import re
+
+# MacOS X libedit autocompleter hack
+if 'libedit' in readline.__doc__:
+  readline.parse_and_bind("bind -e")
+  readline.parse_and_bind("bind '\t' rl_complete")
 
 CONFIG = os.path.join(os.getenv('HOME'), '.yanpassword.conf')
 store = None
