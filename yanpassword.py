@@ -186,7 +186,7 @@ if __name__ == "__main__":
   dbfile = tempfile.NamedTemporaryFile()
 
   r = store.load()
-  if r["status"] == "200":
+  if r.status_code == 200:
     while True:
       cdbpass = getpass.getpass("Enter CryptDB password: ")
       crypter.decrypt_file(cdbpass, store.tmpfile.name, dbfile.name)
@@ -195,10 +195,10 @@ if __name__ == "__main__":
         break
       except:
         print "CryptDB file is invalid, wrong password?"
-  elif r["status"] == "404":
+  elif r.status_code == 404:
     print "Remote CryptDB file not found, creating"
     db = PassDB(dbfile.name)
-  elif r["status"] == "403":
+  elif r.status_code == 403:
     print "Error loading CryptDB file, probably Yandex.Disk is not activated for your account. Visit disk.yandex.com to activate"
     exit(2)
   else:
