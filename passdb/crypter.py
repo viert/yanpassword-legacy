@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 
-from Crypto.Cipher import AES
-import os, sys
+import sys
+try:
+  from Crypto.Cipher import AES
+except ImportError:
+  # MacOSX / Win32 workaround
+  import crypto
+  sys.modules['Crypto'] = crypto
+  from crypto.Cipher import AES
+import os
 import struct
 import random
 import hashlib
