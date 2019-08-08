@@ -42,6 +42,20 @@ class CmdLine(cmd.Cmd):
   lists all services stored in db"""
     self.do_list(arg)
 
+  def do_export(self, arg):
+    """export: exports all the data as json for golang based yanpassword"""
+    import json
+    data = {}
+    for service in db.all():
+      item = {
+        "name": service[0],
+        "username": service[1],
+        "password": service[2],
+        "comment": service[3],
+      }
+      data[item["name"]] = item
+    print json.dumps(data)
+
   def do_get(self, arg):
     """get:
   shows service data

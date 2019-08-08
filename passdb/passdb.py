@@ -16,7 +16,14 @@ class PassDB(object):
     for i in c.fetchall():
       services.append(i[0])
     return services
-  
+
+  def all(self):
+    c = self.conn.execute("SELECT service, login, password, comment FROM passwords")
+    services = []
+    for i in c.fetchall():
+      services.append(i)
+    return services
+
   def get(self, service):
     c = self.conn.execute("SELECT service, login, password, comment FROM passwords WHERE service = '" + service + "'")
     r = c.fetchone()
